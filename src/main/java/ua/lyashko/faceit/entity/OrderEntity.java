@@ -16,13 +16,8 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ElementCollection
-    @CollectionTable(name = "lunches")
-    @Column(columnDefinition = "TEXT") // Указываем тип JDBC, например, JSON
     private List<LunchPOJO> lunches;
 
-    @ElementCollection
-    @CollectionTable(name = "drinks")
     private List<DrinkPOJO> drinks;
 
     private boolean includeCookie;
