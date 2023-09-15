@@ -29,8 +29,10 @@ public class OrderService {
     }
 
     public OrderEntity create(OrderEntity order) {
-        for (LunchEntity lunch : order.getLunches()) {
-            lunchService.createLunch(lunch);
+        if (order.getLunches() != null) {
+            for (LunchEntity lunch : order.getLunches()) {
+                lunchService.createLunch(lunch);
+            }
         }
         return orderRepository.save(order);
     }
