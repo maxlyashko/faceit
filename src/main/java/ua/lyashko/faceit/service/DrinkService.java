@@ -10,16 +10,20 @@ import java.util.Optional;
 
 @Service
 public class DrinkService {
-    @Autowired
-    private DrinkRepository drinkRepository;
+
+    private final DrinkRepository drinkRepository;
+    private final OrderService orderService;
 
     @Autowired
-    private OrderService orderService;
-
+    public DrinkService(DrinkRepository drinkRepository, OrderService orderService) {
+        this.drinkRepository = drinkRepository;
+        this.orderService = orderService;
+    }
 
     public List<DrinkEntity> getAll() {
         return (List<DrinkEntity>) drinkRepository.findAll();
     }
+
 
     public DrinkEntity create(DrinkEntity drinkEntity) {
         return drinkRepository.save(drinkEntity);
@@ -36,6 +40,12 @@ public class DrinkService {
             }
             if (updatedDrink.getPrice()!=0.0) {
                 existingDrink.setPrice(updatedDrink.getPrice());
+            }
+            if (updatedDrink.isIce() || !updatedDrink.isIce()) {
+                existingDrink.setIce(updatedDrink.isIce());
+            }
+            if (updatedDrink.isLemon() || !updatedDrink.isLemon()) {
+                existingDrink.setLemon(updatedDrink.isLemon());
             }
             return drinkRepository.save(existingDrink);
         });

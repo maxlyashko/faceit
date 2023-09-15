@@ -3,6 +3,8 @@ package ua.lyashko.faceit.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ua.lyashko.faceit.entity.DrinkEntity;
+import ua.lyashko.faceit.entity.LunchEntity;
 import ua.lyashko.faceit.entity.OrderEntity;
 import ua.lyashko.faceit.service.OrderService;
 
@@ -13,8 +15,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
+
+    private final OrderService orderService;
+
     @Autowired
-    private OrderService orderService;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping
     public ResponseEntity<String> create(@RequestBody OrderEntity order) {
@@ -41,6 +48,32 @@ public class OrderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{orderId}/drinks")
+    public ResponseEntity<OrderEntity> addDrinkToOrder(
+            @PathVariable Long orderId,
+            @RequestBody DrinkEntity drink) {
+        Optional<OrderEntity> orderOptional = orderService.getById(orderId);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        OrderEntity order = orderOptional.get();
+        orderService.addDrinkToOrder(order, drink);
+        return ResponseEntity.ok(orderService.create(order));
+    }
+
+    @PostMapping("/{orderId}/lunches")
+    public ResponseEntity<OrderEntity> addLunchToOrder(
+            @PathVariable Long orderId,
+            @RequestBody LunchEntity lunch) {
+        Optional<OrderEntity> orderOptional = orderService.getById(orderId);
+        if (orderOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        OrderEntity order = orderOptional.get();
+        orderService.addLunchToOrder(order, lunch);
+        return ResponseEntity.ok(orderService.create(order));
+    }
+
     @DeleteMapping("/{orderId}/drinks/{drinkId}")
     public ResponseEntity<OrderEntity> deleteDrinkFromOrder(
             @PathVariable Long orderId,
@@ -54,16 +87,16 @@ public class OrderController {
         return ResponseEntity.ok(orderService.create(order));
     }
 
-    @DeleteMapping("/{orderId}/food-items/{foodItemId}")
-    public ResponseEntity<OrderEntity> deleteFoodItemFromOrder(
+    @DeleteMapping("/{orderId}/lunches/{lunchId}")
+    public ResponseEntity<OrderEntity> deleteLunchFromOrder(
             @PathVariable Long orderId,
-            @PathVariable Long foodItemId) {
+            @PathVariable Long lunchId) {
         Optional<OrderEntity> orderOptional = orderService.getById(orderId);
         if (orderOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         OrderEntity order = orderOptional.get();
-        orderService.deleteFoodItemFromOrder(order, foodItemId);
+        orderService.deleteLunchFromOrder(order, lunchId);
         return ResponseEntity.ok(orderService.create(order));
     }
 

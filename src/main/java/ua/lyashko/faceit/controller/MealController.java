@@ -10,15 +10,20 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/food-items")
+@RequestMapping("/api/meals")
 public class MealController {
+
+    private final MealService mealService;
+
     @Autowired
-    private MealService mealService;
+    public MealController(MealService mealService) {
+        this.mealService = mealService;
+    }
 
     @PostMapping
     public ResponseEntity<String> create(@RequestBody MealEntity foodItem) {
         return ResponseEntity.created(
-                URI.create("/api/food-items/" + mealService.create(foodItem).getId())).build();
+                URI.create("/api/meals/" + mealService.create(foodItem).getId())).build();
     }
 
     @GetMapping

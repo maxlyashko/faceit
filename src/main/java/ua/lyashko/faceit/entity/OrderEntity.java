@@ -3,8 +3,7 @@ package ua.lyashko.faceit.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import ua.lyashko.faceit.pojo.DrinkPOJO;
-import ua.lyashko.faceit.pojo.LunchPOJO;
+
 
 import java.util.List;
 
@@ -16,9 +15,21 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private List<LunchPOJO> lunches;
+    @ManyToMany
+    @JoinTable(
+            name = "order_lunch",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "lunch_id")
+    )
+    private List<LunchEntity> lunches;
 
-    private List<DrinkPOJO> drinks;
+    @ManyToMany
+    @JoinTable(
+            name = "order_drink",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "drink_id")
+    )
+    private List<DrinkEntity> drinks;
 
     private boolean includeCookie;
 }

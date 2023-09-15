@@ -12,8 +12,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/drinks")
 public class DrinkController {
+
+    private final DrinkService drinkService;
+
     @Autowired
-    private DrinkService drinkService;
+    public DrinkController(DrinkService drinkService) {
+        this.drinkService = drinkService;
+    }
 
     @PostMapping
     public ResponseEntity<String> create(@RequestBody DrinkEntity drink) {

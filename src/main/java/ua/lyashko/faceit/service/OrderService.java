@@ -3,10 +3,9 @@ package ua.lyashko.faceit.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.lyashko.faceit.entity.DrinkEntity;
+import ua.lyashko.faceit.entity.LunchEntity;
 import ua.lyashko.faceit.entity.MealEntity;
 import ua.lyashko.faceit.entity.OrderEntity;
-import ua.lyashko.faceit.pojo.DrinkPOJO;
-import ua.lyashko.faceit.pojo.LunchPOJO;
 import ua.lyashko.faceit.repository.OrderRepository;
 
 import java.util.ArrayList;
@@ -16,14 +15,23 @@ import java.util.Optional;
 @Service
 public class OrderService {
 
+    private final OrderRepository orderRepository;
+    private final LunchService lunchService;
+
     @Autowired
-    private OrderRepository orderRepository;
+    public OrderService(OrderRepository orderRepository, LunchService lunchService) {
+        this.orderRepository = orderRepository;
+        this.lunchService = lunchService;
+    }
 
     public List<OrderEntity> getAll() {
         return (List<OrderEntity>) orderRepository.findAll();
     }
 
     public OrderEntity create(OrderEntity order) {
+        for (LunchEntity lunch : order.getLunches()) {
+            lunchService.createLunch(lunch);
+        }
         return orderRepository.save(order);
     }
 
@@ -39,7 +47,7 @@ public class OrderService {
             if (updatedOrder.getLunches()!=null) {
                 existingOrder.setLunches(updatedOrder.getLunches());
             }
-            if (updatedOrder.isIncludeCookie()) {
+            if (!updatedOrder.isIncludeCookie() || updatedOrder.isIncludeCookie()) {
                 existingOrder.setIncludeCookie(updatedOrder.isIncludeCookie());
             }
             return orderRepository.save(existingOrder);
@@ -49,7 +57,7 @@ public class OrderService {
     public boolean isDrinkUsedInAnyOrder(DrinkEntity drink) {
         List<OrderEntity> orders = getAll();
         for (OrderEntity order : orders) {
-            List<DrinkPOJO> drinksInOrder = order.getDrinks();
+            List<DrinkEntity> drinksInOrder = order.getDrinks();
             if (drinksInOrder!=null && drinksInOrder.contains(drink)) {
                 return true;
             }
@@ -57,35 +65,41 @@ public class OrderService {
         return false;
     }
 
-    public boolean isFoodItemUsedInAnyOrder(MealEntity foodItem) {
+    public boolean isFoodItemUsedInAnyLunch(MealEntity foodItem) {
         List<OrderEntity> orders = getAll();
         for (OrderEntity order : orders) {
-            List<LunchPOJO> foodItemInOrder = order.getLunches();
-            if (foodItemInOrder!=null && foodItemInOrder.contains(foodItem)) {
-                return true;
+            List<LunchEntity> foodItemInOrder = order.getLunches();
+            for (LunchEntity lunch : foodItemInOrder) {
+                List<MealEntity> mainCourse = lunch.getMainCourse();
+                List<MealEntity> dessert = lunch.getDessert();
+                if ((mainCourse!=null && mainCourse.contains(foodItem)) ||
+                        (dessert!=null && dessert.contains(foodItem))) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    public void addLunchToOrder(OrderEntity order, LunchPOJO lunch) {
+    public void addLunchToOrder(OrderEntity order, LunchEntity lunch) {
+        lunchService.createLunch(lunch);
         order.getLunches().add(lunch);
     }
 
-    public void addDrinkToOrder(OrderEntity order, DrinkPOJO drink) {
+    public void addDrinkToOrder(OrderEntity order, DrinkEntity drink) {
         order.getDrinks().add(drink);
     }
 
     public void deleteDrinkFromOrder(OrderEntity order, Long id) {
-        List<DrinkPOJO> drinks = new ArrayList<>(order.getDrinks());
+        List<DrinkEntity> drinks = new ArrayList<>(order.getDrinks());
         drinks.remove(id.intValue());
         order.setDrinks(drinks);
     }
 
-    public void deleteFoodItemFromOrder(OrderEntity order, Long id) {
-        List<LunchPOJO> meals = new ArrayList<>(order.getLunches());
-        meals.remove(id.intValue());
-        order.setLunches(meals);
+    public void deleteLunchFromOrder(OrderEntity order, Long id) {
+        List<LunchEntity> lunches = new ArrayList<>(order.getLunches());
+        lunches.remove(id.intValue());
+        order.setLunches(lunches);
     }
 
     public void deleteOrder(Long id) {

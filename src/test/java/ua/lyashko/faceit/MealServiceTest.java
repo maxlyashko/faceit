@@ -134,7 +134,7 @@ public class MealServiceTest {
 
         when(mealRepository.findById(1L)).thenReturn(Optional.of(foodItem));
 
-        when(orderService.isFoodItemUsedInAnyOrder(foodItem)).thenReturn(true);
+        when(orderService.isFoodItemUsedInAnyLunch(foodItem)).thenReturn(true);
 
         assertThrows(IllegalStateException.class, () -> {
             mealService.delete(1L);
@@ -150,7 +150,7 @@ public class MealServiceTest {
 
         when(mealRepository.findById(1L)).thenReturn(Optional.of(foodItem));
 
-        when(orderService.isFoodItemUsedInAnyOrder(foodItem)).thenReturn(false);
+        when(orderService.isFoodItemUsedInAnyLunch(foodItem)).thenReturn(false);
 
         mealService.delete(1L);
 

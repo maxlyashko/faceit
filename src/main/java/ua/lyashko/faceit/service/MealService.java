@@ -11,11 +11,14 @@ import java.util.Optional;
 @Service
 public class MealService {
 
-    @Autowired
-    private MealRepository mealRepository;
+    private final MealRepository mealRepository;
+    private final OrderService orderService;
 
     @Autowired
-    private OrderService orderService;
+    public MealService(MealRepository mealRepository, OrderService orderService) {
+        this.mealRepository = mealRepository;
+        this.orderService = orderService;
+    }
 
     public List<MealEntity> getAll() {
         return (List<MealEntity>) mealRepository.findAll();
@@ -50,7 +53,7 @@ public class MealService {
             throw new IllegalArgumentException("Food item with ID " + id + " not found");
         }
         MealEntity foodItem = foodItemOptional.get();
-        if (orderService.isFoodItemUsedInAnyOrder(foodItem)) {
+        if (orderService.isFoodItemUsedInAnyLunch(foodItem)) {
             throw new IllegalStateException("Food item with ID " + id + " is already used in an order");
         }
         mealRepository.deleteById(id);
